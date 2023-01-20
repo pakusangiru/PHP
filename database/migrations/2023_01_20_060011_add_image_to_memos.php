@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTagIdToMemosTable extends Migration
+class AddImageToMemos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddTagIdToMemosTable extends Migration
      */
     public function up()
     {
-        Schema::table('memos', function (Blueprint $table) {    
-            $table->bigInte ger('tag_id')->nullable()->after('user_id');
+        Schema::table('memos', function (Blueprint $table) {
+            $table->string('image')->after('tag_id')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AddTagIdToMemosTable extends Migration
     public function down()
     {
         Schema::table('memos', function (Blueprint $table) {
-            $table->dropColumn('tag_id');
+            $table->dropColumn('image');
         });
     }
 }

@@ -32,36 +32,33 @@ class HomeController extends Controller
     {
         return view('create');
     }
-
+    
     public function store(Request $request)
-    {
+    {   
         $data = $request->all();
         $image = $request->file('image');
-        // dd($data);
+        // dd($image);
         // 画像がアップロードされていれば、storageに保存
         if($request->hasFile('image')){
-            $path = \Storage::put('/public',$image);
-            $path = explode('/',$path);
+            $path = \Storage::put('/public', $image);
+            $path = explode('/', $path);
         }else{
             $path = null;
         }
 
         // POSTされたデータをDB（memosテーブル）に挿入
-        // MEMOモデルにDBへ保存する命令を出す  
-        
-        //同じタグがあるか確認
-        $exist_tag = Tag::where('name', $data['tag'])->where('user_id',$data['user_id'])->first();
-        if(empty($exist_tag['id']) ) {
-        //先にタグをインサート  
-        $tag_id = Tag::insertGetId(['name' => $data['tag'],'user_id' => $data['user_id']]
-        );
+        // MEMOモデルにDBへ保存する命令を出す
+
+        // 同じタグがあるか確認
+        $exist_tag = Tag::where('name', $data['tag'])->where('user_id', $data['user_id'])->first();
+        if( empty($exist_tag['id']) ){
+            //先にタグをインサート
+            $tag_id = Tag::insertGetId(['name' => $data['tag'], 'user_id' => $data['user_id']]);
         }else{
             $tag_id = $exist_tag['id'];
         }
-        // dd($tag_id);
-        //タグのIDが判明する        
-        //タグIDをmemosテーブルに入れてあげる
-        
+        //タグのIDが判明する
+        // タグIDをmemosテーブルに入れてあげる
         $memo_id = Memo::insertGetId([
             'content' => $data['content'],
              'user_id' => $data['user_id'], 
@@ -72,32 +69,35 @@ class HomeController extends Controller
         
         // リダイレクト処理
         return redirect()->route('home');
-     }  
+    }
     
-     public function edit($id){
-        //該当するIDのメモをデータベースから取得
+    public function edit($id){
+        // 該当するIDのメモをデータベースから取得
         $user = \Auth::user();
-        $memo = Memo::where('status',1)->where('id',$id)->where('user_id',$user['id'])
-        ->first();
-        // dd($memo);
+        $memo = Memo::where('status', 1)->where('id', $id)->where('user_id', $user['id'])
+          ->first();
+        //   dd($memo);
         //取得したメモをViewに渡す
         return view('edit',compact('memo'));
-     }
+    }
 
-     public function update(Request $request, $id)
-     {
+    public function update(Request $request, $id)
+    {
         $inputs = $request->all();
         // dd($inputs);
-        Memo::where('id',$id) ->update(['content'=> $inputs['content'], 'tag_id' => $inputs['tag_id']]);
+        Memo::where('id', $id)->update(['content' => $inputs['content'], 'tag_id' => $inputs['tag_id'] ]);
         return redirect()->route('home');
-     }
+    }
 
-     public function delete(Request $request, $id)
-     {
+    public function delete(Request $request, $id)
+    {
         $inputs = $request->all();
         // dd($inputs);
-        //論理削除なので、status=2
-        Memo::where('id',$id)->update([ 'status' => 2 ]);
-        return redirect()->route('home')->with('success','メモの削除が完了しました。');
-     }
+        // 論理削除なので、status=2
+        Memo::where('id', $id)->update([ 'status' => 2 ]);
+        // ↓は物理削除
+        // Memo::where('id', $id)->delete();
+
+        return redirect()->route('home')->with('success', 'メモの削除が完了しました！');
+    }
 }
